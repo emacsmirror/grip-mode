@@ -115,6 +115,11 @@ Only available for `grip'."
   :type 'integer
   :group 'grip)
 
+(defcustom grip-real-time-refresh nil
+  "Boolean value to allow real time refresh without saving the file. Support for markdown file only."
+  :type 'boolean
+  :group 'grip)
+
 
 
 ;; Externals
@@ -167,6 +172,10 @@ Use default browser unless `xwidget' is available."
     (format "http://%s:%d/%s" grip-preview-host grip--port
             (file-name-nondirectory grip--preview-file))))
 
+(defun grip--refresh (&rest args)
+  "Save into the temp file to trigger refresh."
+  (write-region (point-min) (point-max) grip--preview-file nil 'quiet))
+
 (defun grip-start-process ()
   "Render and preview."
   (unless (process-live-p grip--process)
@@ -204,7 +213,9 @@ Use default browser unless `xwidget' is available."
            (message "%s: Preview `%s' on %s"
                     grip--command
                     (abbreviate-file-name buffer-file-name)
-                    (grip--preview-url)))))
+                    (grip--preview-url))))
+        ;; Support real-time refresh
+        (if grip-real-time-refresh (add-hook 'after-change-functions (function grip--refresh) nil t)))
       ('go-grip
        (unless (executable-find "go-grip")
          (grip-mode -1)
@@ -273,15 +284,21 @@ Use default browser unless `xwidget' is available."
     (delete-process grip--process)
     (message "Process `%s' killed" grip--process)
     (setq grip--process nil)
-    (setq grip--port 6418)
-    ;; Delete preview temporary file
-    (when (and grip--preview-file
-               (not (string-equal grip--preview-file buffer-file-name)))
-      (delete-file grip--preview-file))))
+    (setq grip--port 6418))
+  ;; Delete preview temporary file; As for kill-emacs case the process
+  ;; could be killed by other ways, process may not existed, hence
+  ;; deleting the file is separating out for the clean-up process.
+  (when (and grip--preview-file
+          (not (string-equal grip--preview-file buffer-file-name)))
+    (delete-file grip--preview-file)))
 
 (defun grip--preview-md ()
   "Render and preview markdown with grip."
-  (setq grip--preview-file buffer-file-name)
+  (if grip-real-time-refresh
+   (progn
+     (setq grip--preview-file (concat buffer-file-name ".temp.md"))
+     (copy-file buffer-file-name grip--preview-file "overwrite"))
+    (setq grip--preview-file buffer-file-name))
   (grip-start-process))
 
 (defun grip-org-to-md (&rest _)
