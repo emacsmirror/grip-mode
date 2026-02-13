@@ -121,6 +121,9 @@ Run `M-x customize-group RET grip RET` or set the variables.
 
 ;; Sleep seconds to ensure the server starts
 (setq grip-sleep-time 2)
+
+;; Set to allow real-time refresh
+(setq grip-real-time-refresh t)
 ```
 
 If you don't set them you may have limitation to access Github APIs. Please
