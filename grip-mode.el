@@ -113,6 +113,15 @@ Support for markdown file only."
   :type 'boolean
   :group 'grip)
 
+(defcustom grip-theme 'auto
+  "Color theme for the rendered preview.
+Currently available in mdopen."
+  :type '(choice
+          (const :tag "Auto" auto)
+          (const :tag "Light" light)
+          (const :tag "Dark" dark))
+  :group 'grip)
+
 
 
 ;; Externals
