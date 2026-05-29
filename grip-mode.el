@@ -223,6 +223,7 @@ Use default browser unless `xwidget' is available."
                (start-process (format "mdopen-%d" grip--port)
                               (format " *mdopen-%d*" grip--port)
                               "mdopen"
+                              (format "--host=%s" grip-preview-host)
                               (format "--port=%d" grip--port)
                               (format "--theme=%s" grip-theme)
                               "--browser="
@@ -237,6 +238,7 @@ Use default browser unless `xwidget' is available."
                (start-process (format "go-grip-%d" grip--port)
                               (format " *go-grip-%d*" grip--port)
                               "go-grip"
+                              (format "--host=%s" grip-preview-host)
                               (format "--port=%d" grip--port)
                               "--browser=false"
                               "--bounding-box=false"
